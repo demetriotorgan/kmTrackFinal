@@ -1,4 +1,4 @@
-// src/services/useSalvarTrecho.js
+// src/hooks/useSalvarTrecho.js
 import { useState } from "react";
 import api from "../api/api";
 import { dateToIso, hhmmToIso } from "../util/time";
@@ -9,45 +9,59 @@ export function useSalvarTrecho() {
     distancia: "",
     inicio: "",
     fim: "",
-    data: ""
+    data: "",
   };
 
   const [dadosTrecho, setDadosTrecho] = useState(trechoInicial);
   const [salvando, setSalvando] = useState(false);
 
+  // -----------------------------
+  // Atualiza campos do formulário
+  // -----------------------------
   const handleDadosTrecho = (e) => {
     const { name, value } = e.target;
     setDadosTrecho((prev) => ({ ...prev, [name]: value }));
   };
 
+  // -----------------------------
+  // Criação do payload
+  // -----------------------------
   const criarPayload = () => ({
     nomeTrecho: dadosTrecho.nomeTrecho,
     distancia: Number(dadosTrecho.distancia) || 0,
     inicio: hhmmToIso(dadosTrecho.inicio),
     fim: hhmmToIso(dadosTrecho.fim),
-    data: dateToIso(dadosTrecho.data)
+    data: dateToIso(dadosTrecho.data),
   });
 
+  // -----------------------------
+  // SALVAR TRECHO (online/offline)
+  // -----------------------------
   const salvarTrecho = async () => {
     const confirmar = window.confirm("Deseja salvar este trecho?");
     if (!confirmar) return;
 
+    const payload = criarPayload();
+
     try {
       setSalvando(true);
-      const payload = criarPayload();
-      console.log("payload:", payload);
-
       const response = await api.post("/salvar-trecho", payload);
-      console.log("API response:", response.data);
+      console.log(response.data);
 
-      alert("Registro salvo com sucesso!");
-      setDadosTrecho(trechoInicial);
-
+      alert("Trecho salvo com sucesso!");
     } catch (error) {
-      console.error("Erro ao salvar trecho:", error);
+      console.warn("Erro ao salvar trecho:", error);
 
+      // Caso offline → o interceptor já salvou no IndexedDB
+      if (error.offline) {
+        alert("Sem internet. O trecho foi salvo offline e será sincronizado depois.");
+        
+      } else {
+        alert("Erro inesperado ao salvar.");
+      }
     } finally {
       setSalvando(false);
+      setDadosTrecho(prev => ({...trechoInicial}));
     }
   };
 
@@ -56,6 +70,6 @@ export function useSalvarTrecho() {
     salvando,
     handleDadosTrecho,
     salvarTrecho,
-    resetar: () => setDadosTrecho(trechoInicial)
+    resetar: () => setDadosTrecho(trechoInicial),
   };
 }

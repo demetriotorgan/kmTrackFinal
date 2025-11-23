@@ -1,0 +1,29 @@
+// src/services/idbService.js
+import { openDB } from "idb";
+
+const DB_NAME = "viagemDB";
+const DB_VERSION = 1;
+
+export async function getDB() {
+  return openDB(DB_NAME, DB_VERSION, {
+    upgrade(db) {
+      if (!db.objectStoreNames.contains("pendentes"))
+        db.createObjectStore("pendentes", { keyPath: "uuid" });
+    },
+  });
+}
+
+export async function salvarItem(store, item) {
+  const db = await getDB();
+  await db.put(store, item);
+}
+
+export async function listarItens(store) {
+  const db = await getDB();
+  return await db.getAll(store);
+}
+
+export async function removerItem(store, key) {
+  const db = await getDB();
+  await db.delete(store, key);
+}
