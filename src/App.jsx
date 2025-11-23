@@ -7,6 +7,7 @@ import NavBar from './componentes/NavBar'
 import Parada from './componentes/Parada'
 import Pedagio from './componentes/Pedagio'
 import Trecho from './componentes/Trecho'
+import StatusConexao from './componentes/StatusConexao'
 
 function App() {
   const [selected, setSelected] = useState('');
@@ -18,6 +19,7 @@ function App() {
   return (
     <>
       <NavBar />
+      <StatusConexao />
       <Menu onChangeOption = {handleSelectChange} /> 
       {selected === 'trecho' && <Trecho />}
       {selected === 'parada' && <Parada />}
