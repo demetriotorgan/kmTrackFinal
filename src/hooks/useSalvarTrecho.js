@@ -55,6 +55,7 @@ export function useSalvarTrecho() {
       // Caso offline → o interceptor já salvou no IndexedDB
       if (error.offline) {
         alert("Sem internet. O trecho foi salvo offline e será sincronizado depois.");
+        window.dispatchEvent(new Event("pendentesAtualizados"));
         
       } else {
         alert("Erro inesperado ao salvar.");

@@ -4,13 +4,19 @@ import api from '../api/api';
 import { dateToIso, hhmmToIso } from '../util/time';
 import ModalSalvando from './ModalSalvando';
 import { useSalvarTrecho } from '../hooks/useSalvarTrecho';
+import TrechoPendenteLista from './TrechoPendenteLista';
 
 const Trecho = () => {
+    const [pendentes, setPendentes] = useState([]);
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
 
   return (
     <>
     {salvando && (<ModalSalvando />)}
+    <TrechoPendenteLista
+    pendentes={pendentes}
+    setPendentes={setPendentes}
+    />
     <div className='container'>
         <h2>Novo Trecho <Map /></h2>
         <label>

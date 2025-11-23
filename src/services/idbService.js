@@ -4,6 +4,10 @@ import { openDB } from "idb";
 const DB_NAME = "viagemDB";
 const DB_VERSION = 1;
 
+function emitirEventoPendentesAtualizados() {
+  window.dispatchEvent(new Event("pendentesAtualizados"));
+}
+
 export async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
@@ -16,6 +20,7 @@ export async function getDB() {
 export async function salvarItem(store, item) {
   const db = await getDB();
   await db.put(store, item);
+  emitirEventoPendentesAtualizados();
 }
 
 export async function listarItens(store) {
@@ -26,4 +31,5 @@ export async function listarItens(store) {
 export async function removerItem(store, key) {
   const db = await getDB();
   await db.delete(store, key);
+  emitirEventoPendentesAtualizados();
 }
