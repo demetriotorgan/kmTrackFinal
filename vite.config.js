@@ -8,8 +8,9 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
 
+      // DESATIVE o SW no DEV para evitar logs
       devOptions: {
-        enabled: true,
+        enabled: false
       },
 
       includeAssets: [
@@ -26,16 +27,8 @@ export default defineConfig({
         theme_color: '#ffffff',
         background_color: '#ffffff',
         icons: [
-          {
-            src: 'icon-192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'icon-512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          }
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
       },
 
@@ -46,17 +39,13 @@ export default defineConfig({
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/'),
             handler: 'NetworkFirst',
-            options: {
-              cacheName: 'pages-cache',
-            }
+            options: { cacheName: 'pages-cache' }
           },
           {
             urlPattern: ({ request }) =>
               ['style', 'script', 'worker'].includes(request.destination),
             handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'assets-cache',
-            }
+            options: { cacheName: 'assets-cache' }
           }
         ]
       }
