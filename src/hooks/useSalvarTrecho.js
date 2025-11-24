@@ -74,6 +74,8 @@ export function useSalvarTrecho() {
       console.log(response.data);
 
       alert("Trecho salvo com sucesso!");
+      window.dispatchEvent(new Event("trechoSalvoOnline"));
+      
     } catch (error) {
       console.warn("Erro ao salvar trecho:", error);
 

@@ -2,7 +2,7 @@
 import { openDB } from "idb";
 
 const DB_NAME = "viagemDB";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function emitirEventoPendentesAtualizados() {
   window.dispatchEvent(new Event("pendentesAtualizados"));
@@ -11,9 +11,13 @@ function emitirEventoPendentesAtualizados() {
 export async function getDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
-      if (!db.objectStoreNames.contains("pendentes"))
-        db.createObjectStore("pendentes", { keyPath: "uuid" });
-    },
+      if (!db.objectStoreNames.contains("pendentes")){
+        db.createObjectStore("pendentes", { keyPath: "uuid" });     
+      }
+       if (!db.objectStoreNames.contains("listaDeTrechosOFF")) {
+        db.createObjectStore("listaDeTrechosOFF", { keyPath: "_id" });
+      }
+    },    
   });
 }
 

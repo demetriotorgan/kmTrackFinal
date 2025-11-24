@@ -1,15 +1,53 @@
 import React, { useEffect, useState } from 'react'
-import { Wifi, WifiOff } from "lucide-react"; // caso use lucide-react
+import { Wifi, WifiOff } from "lucide-react";
+import api from "../api/api"; 
+import { salvarItem } from "../services/idbService";
 
 const StatusConexao = () => {
-    const [online, setOnline] = useState(navigator.onLine);
-    
+  const [online, setOnline] = useState(navigator.onLine);
 
+  // -----------------------------
+  // Função para carregar a lista da API e salvar no IndexedDB
+  // -----------------------------
+  const carregarListaTrechos = async () => {
+    if (!navigator.onLine) return; // segurança extra
+
+    try {
+      const { data } = await api.get("/listar-trechos");
+
+      if (Array.isArray(data)) {
+        // salva cada item usando o keyPath "_id"
+        for (const trecho of data) {
+          await salvarItem("listaDeTrechosOFF", trecho);
+        }
+        console.log("Lista carregada e salva no IndexedDB.");
+      }
+    } catch (err) {
+      console.warn("Erro ao carregar lista da API:", err);
+    }
+  };
+
+  // -----------------------------
+  // 1️⃣ Executa ao INICIAR a aplicação
+  // -----------------------------
   useEffect(() => {
-    const handleOnline = () => setOnline(true);
+    if (navigator.onLine) {
+      carregarListaTrechos();
+    }
+  }, []); // roda apenas 1x ao montar
+
+  // -----------------------------
+  // 2️⃣ Executa quando voltar a ficar online
+  // -----------------------------
+  useEffect(() => {
+    const handleOnline = () => {
+      setOnline(true);
+      carregarListaTrechos(); // sincroniza quando voltar online
+    };
+
     const handleOffline = () => setOnline(false);
 
-    window.addEventListener("online", handleOnline);
+    window.addEventListener("online",  handleOnline);
     window.addEventListener("offline", handleOffline);
 
     return () => {
@@ -17,8 +55,9 @@ const StatusConexao = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
+
   return (
-     <div
+    <div
       style={{
         width: "100%",
         padding: "8px 12px",
@@ -30,7 +69,7 @@ const StatusConexao = () => {
         fontWeight: "bold",
         gap: "8px",
         transition: "0.3s ease",
-        position: "sticky",  // fica no topo
+        position: "sticky",
         top: 0,
         zIndex: 9999,
       }}
@@ -38,7 +77,7 @@ const StatusConexao = () => {
       {online ? (
         <>
           <Wifi size={18} />
-          Conectado  
+          Conectado
         </>
       ) : (
         <>
@@ -47,7 +86,7 @@ const StatusConexao = () => {
         </>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StatusConexao
+export default StatusConexao;

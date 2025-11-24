@@ -84,6 +84,8 @@ export async function syncPendentes() {
   }
 
   console.warn("🎉 Todos os itens pendentes foram sincronizados!");
+  // 🔥 AVISA o hook useListaTrechos para recarregar da API
+  window.dispatchEvent(new Event("trechoSalvoOnline"));
 }
 
 // ------------------------------------------------------

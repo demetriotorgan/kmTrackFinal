@@ -126,6 +126,9 @@ button {
 /* --- Botão de Atenção --- */
 .botao-atencao {
   background-color: var(--color-accent);
+  display: flex;
+  justify-content: center;
+  gap: 5px;
   color: #1a1a1a;
 }
 .botao-atencao:hover {

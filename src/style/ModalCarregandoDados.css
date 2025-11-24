@@ -1,0 +1,19 @@
+/* ---Loading--- */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px; /* ajuste conforme o layout */
+  text-align: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 6px solid #f3f3f3;        /* cor da borda de fundo */
+  border-top: 6px solid #ffcc00;    /* cor principal (amarela, se quiser combinar com seu tema) */
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
