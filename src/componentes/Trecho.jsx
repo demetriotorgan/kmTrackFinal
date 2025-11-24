@@ -8,12 +8,22 @@ import TrechoPendenteLista from './TrechoPendenteLista';
 import '../style/Trecho.css'
 import { useListaTrechos } from '../hooks/useListaTrecho';
 import ModalCarregandoDados from './ModalCarregandoDados';
+import { syncPendentes, iniciarMonitoramento } from '../services/syncManager';
 
 const Trecho = () => {
     const [pendentes, setPendentes] = useState([]);
     
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
    const {listaTrechos, carregando, erro, listaIndexDB} = useListaTrechos();
+
+   useEffect(() => {
+    // Inicia o monitoramento de reconexão (evento "online")
+    iniciarMonitoramento();
+
+    // Executa sincronização imediata quando o componente carrega
+    syncPendentes();
+
+}, []); // Apenas no primeiro carregamento do componente
 
    
   return (
