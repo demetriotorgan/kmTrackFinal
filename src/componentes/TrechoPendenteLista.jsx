@@ -8,7 +8,7 @@ const TrechoPendenteLista = ({pendentes,setPendentes}) => {
      
     async function carregarPendentes() {
         const itens = await listarItens("pendentes");
-        console.log(itens);
+        // console.log(itens);
         setPendentes(itens);
   }
 

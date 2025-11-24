@@ -3,7 +3,7 @@ import api from "../api/api";
 import { listarItens, removerItem } from "./idbService";
 
 // ---------------------------------------------
-// Função para derivar um nome amigável do item
+// Nome amigável do recurso
 // ---------------------------------------------
 function getNomeRecurso(item) {
   if (!item?.url) return "Registro";
@@ -18,7 +18,7 @@ function getNomeRecurso(item) {
 }
 
 // ---------------------------------------------
-// Sincronização dos itens pendentes
+// SINCRONIZAR ITENS PENDENTES
 // ---------------------------------------------
 export async function syncPendentes() {
   const pendentes = await listarItens("pendentes");
@@ -42,17 +42,44 @@ export async function syncPendentes() {
         data: item.data,
       });
 
-      // removendo do IndexedDB
+      // Remover item da fila
       await removerItem("pendentes", item.uuid);
+      console.log(`✔ Sincronizado: ${nome}`);
 
-      console.log(`✔ Sincronizado com sucesso: ${nome}`);
-
-      // 👉 Mensagem amigável para o usuário
       alert(`✓ ${nome} sincronizado com sucesso!`);
 
     } catch (err) {
       console.error(`❌ Erro ao sincronizar ${nome}:`, err);
-      return; // evita looping infinito se continuar falhando
+
+      // ---------------------------
+      // 🔥 TRATAMENTO DE ERROS DA API
+      // ---------------------------
+      if (err.response) {
+        const status = err.response.status;
+
+        // ⚠ 400 — Registro duplicado
+        if (status === 400) {
+          const mensagem = err.response.data?.mensagem ?? "Registro já existe na API.";
+
+          alert(`⚠ Atenção\n\n${mensagem}`);
+
+          // O item deve ser removido da fila porque nunca será aceito pela API
+          await removerItem("pendentes", item.uuid);
+
+          // Continua sincronizando os próximos itens
+          continue;
+        }
+
+        // ❗ Erros de servidor 500+
+        if (status >= 500) {
+          alert("Erro no servidor ao sincronizar. Tente novamente mais tarde.");
+          return; // Para aqui pois provavelmente está instável
+        }
+      }
+
+      // Erro genérico (timeout / rede / etc.)
+      alert("Erro inesperado ao sincronizar itens offline.");
+      return;
     }
   }
 
@@ -60,7 +87,7 @@ export async function syncPendentes() {
 }
 
 // ------------------------------------------------------
-// Monitoramento automático quando reconectar na internet
+// Monitoramento automático quando reconectar
 // ------------------------------------------------------
 export function iniciarMonitoramento() {
   window.addEventListener("online", () => {
