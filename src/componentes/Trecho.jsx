@@ -10,41 +10,14 @@ import { useListaTrechos } from '../hooks/useListaTrecho';
 import ModalCarregandoDados from './ModalCarregandoDados';
 import { syncPendentes, iniciarMonitoramento } from '../services/syncManager';
 import { removerItem } from '../services/idbService';
+import { useExcluirTrecho } from '../hooks/useExcluirTrecho';
 
 const Trecho = () => {
-    const [pendentes, setPendentes] = useState([]);
-    const [excluindo, setExcluindo] = useState(false);
+    const [pendentes, setPendentes] = useState([]);    
     
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
    const {listaTrechos, carregando, erro, listaIndexDB, recarregar} = useListaTrechos();
-
-   const excluirTrechoOnline = async(id)=>{
-    try {
-      setExcluindo(true);
-      const response = await api.delete(`/deletar-trecho/${id}`);
-      console.log(response.data);
-      await removerItem("listaDeTrechosOFF", id); 
-      return {sucesso: true}    
-
-    } catch (error) {
-      console.error('Erro na exclusão online: ', error)
-      return {sucesso:false, erro: error.message}
-    }finally{
-      setExcluindo(false);
-    }
-   }
-
-   const handleExcluirTrecho = async(item)=>{
-    const confirmar = confirm('Deseja realmente excluir este registro?');
-    if(!confirmar) return 
-
-    const resultado = await excluirTrechoOnline(item._id);
-
-    if(resultado.sucesso){
-      alert('Trecho excluido com sucesso')
-      recarregar();
-    }
-   }
+    const { excluirTrecho, excluindo } = useExcluirTrecho(recarregar);   
 
   return (
     <>
@@ -117,7 +90,7 @@ const Trecho = () => {
           <p><strong>Distância:</strong> {item.distancia} km</p>
           <p><strong>Início:</strong> {item.inicio}</p>
           <p><strong>Fim:</strong> {item.fim}</p>
-          <button className='botao-atencao' onClick={()=> handleExcluirTrecho(item)}>Excluir <Trash2 /></button>
+          <button className='botao-atencao' onClick={()=> excluirTrecho(item)}>Excluir <Trash2 /></button>
         </div>    
       ))}
     </div>
