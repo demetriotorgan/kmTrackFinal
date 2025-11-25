@@ -17,13 +17,23 @@ const Trecho = () => {
    const {listaTrechos, carregando, erro, listaIndexDB} = useListaTrechos();
 
    useEffect(() => {
-    // Inicia o monitoramento de reconexão (evento "online")
-    iniciarMonitoramento();
+    iniciarMonitoramento(); 
 
-    // Executa sincronização imediata quando o componente carrega
-    syncPendentes();
+    const sincronizarAoVoltarOnline = () => {
+        syncPendentes();
+    };
 
-}, []); // Apenas no primeiro carregamento do componente
+    if (navigator.onLine) {
+        // Se já está online ao abrir, sincroniza imediatamente
+        syncPendentes();
+    }
+
+    window.addEventListener("online", sincronizarAoVoltarOnline);
+
+    return () => {
+        window.removeEventListener("online", sincronizarAoVoltarOnline);
+    };
+}, []);
 
    
   return (
