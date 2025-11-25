@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Wifi, WifiOff } from "lucide-react";
 import api from "../api/api"; 
 import { salvarItem } from "../services/idbService";
+import DbStatus from './DbStatus';
 
 const StatusConexao = () => {
   const [online, setOnline] = useState(navigator.onLine);
@@ -77,14 +78,16 @@ const StatusConexao = () => {
       {online ? (
         <>
           <Wifi size={18} />
-          Conectado
+          Conectado          
         </>
       ) : (
         <>
           <WifiOff size={18} />
           Sem conexão — funcionando offline
         </>
-      )}
+      )}      
+      {online ? (<DbStatus />) : ''}
+      
     </div>
   );
 };
