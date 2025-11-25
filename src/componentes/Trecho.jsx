@@ -9,17 +9,46 @@ import '../style/Trecho.css'
 import { useListaTrechos } from '../hooks/useListaTrecho';
 import ModalCarregandoDados from './ModalCarregandoDados';
 import { syncPendentes, iniciarMonitoramento } from '../services/syncManager';
+import { removerItem } from '../services/idbService';
 
 const Trecho = () => {
     const [pendentes, setPendentes] = useState([]);
+    const [excluindo, setExcluindo] = useState(false);
     
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
-   const {listaTrechos, carregando, erro, listaIndexDB} = useListaTrechos();
+   const {listaTrechos, carregando, erro, listaIndexDB, recarregar} = useListaTrechos();
 
+   const excluirTrechoOnline = async(id)=>{
+    try {
+      setExcluindo(true);
+      const response = await api.delete(`/deletar-trecho/${id}`);
+      console.log(response.data);
+      await removerItem("listaDeTrechosOFF", id); 
+      return {sucesso: true}    
+
+    } catch (error) {
+      console.error('Erro na exclusão online: ', error)
+      return {sucesso:false, erro: error.message}
+    }finally{
+      setExcluindo(false);
+    }
+   }
+
+   const handleExcluirTrecho = async(item)=>{
+    const confirmar = confirm('Deseja realmente excluir este registro?');
+    if(!confirmar) return 
+
+    const resultado = await excluirTrechoOnline(item._id);
+
+    if(resultado.sucesso){
+      alert('Trecho excluido com sucesso')
+      recarregar();
+    }
+   }
 
   return (
     <>
-    {salvando && (<ModalSalvando />)}
+    {(salvando || excluindo) && (<ModalSalvando />)}
     <TrechoPendenteLista
     pendentes={pendentes}
     setPendentes={setPendentes}
@@ -88,7 +117,7 @@ const Trecho = () => {
           <p><strong>Distância:</strong> {item.distancia} km</p>
           <p><strong>Início:</strong> {item.inicio}</p>
           <p><strong>Fim:</strong> {item.fim}</p>
-          <button className='botao-atencao'>Excluir <Trash2 /></button>
+          <button className='botao-atencao' onClick={()=> handleExcluirTrecho(item)}>Excluir <Trash2 /></button>
         </div>    
       ))}
     </div>
