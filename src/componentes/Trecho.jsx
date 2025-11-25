@@ -17,22 +17,7 @@ const Trecho = () => {
    const {listaTrechos, carregando, erro, listaIndexDB} = useListaTrechos();
 
    useEffect(() => {
-    iniciarMonitoramento(); 
-
-    const sincronizarAoVoltarOnline = () => {
-        syncPendentes();
-    };
-
-    if (navigator.onLine) {
-        // Se já está online ao abrir, sincroniza imediatamente
-        syncPendentes();
-    }
-
-    window.addEventListener("online", sincronizarAoVoltarOnline);
-
-    return () => {
-        window.removeEventListener("online", sincronizarAoVoltarOnline);
-    };
+    
 }, []);
 
    
