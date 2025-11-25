@@ -16,11 +16,7 @@ const Trecho = () => {
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
    const {listaTrechos, carregando, erro, listaIndexDB} = useListaTrechos();
 
-   useEffect(() => {
-    
-}, []);
 
-   
   return (
     <>
     {salvando && (<ModalSalvando />)}

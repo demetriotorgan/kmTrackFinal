@@ -12,7 +12,7 @@ export default defineConfig({
         enabled: false
       },
 
-      includeAssets: ["favicon.ico", "icon-192.png", "icon-512.png"],
+      includeAssets: ["favicon.svg"],
 
       manifest: {
         name: "Controle de Viagem",
@@ -20,11 +20,7 @@ export default defineConfig({
         start_url: "/",
         display: "standalone",
         theme_color: "#ffffff",
-        background_color: "#ffffff",
-        icons: [
-          { src: "icon-192.png", sizes: "192x192", type: "image/png" },
-          { src: "icon-512.png", sizes: "512x512", type: "image/png" }
-        ]
+        background_color: "#ffffff",        
       },
 
       // ---------------------------------------------------------
