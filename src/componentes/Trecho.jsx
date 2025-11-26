@@ -11,14 +11,29 @@ import ModalCarregandoDados from './ModalCarregandoDados';
 import { syncPendentes, iniciarMonitoramento } from '../services/syncManager';
 import { removerItem } from '../services/idbService';
 import { useExcluirTrecho } from '../hooks/useExcluirTrecho';
+import { useExcluirTrechoOff } from '../hooks/useExcluirTrechoOff';
 
 const Trecho = () => {
     const [pendentes, setPendentes] = useState([]);    
     
    const {dadosTrecho, salvando, handleDadosTrecho, salvarTrecho} = useSalvarTrecho();
-   const {listaTrechos, carregando, erro, listaIndexDB, recarregar} = useListaTrechos();
+   const {listaTrechos, carregando, erro, listaIndexDB, recarregar,setListaTrechos} = useListaTrechos();
     const { excluirTrecho, excluindo } = useExcluirTrecho(recarregar);   
+    const { excluirOffline, excluindoOff } = useExcluirTrechoOff({setListaTrechos});
 
+    const handleExcluir = (item)=>{
+       console.log("🗑️ [handleExcluir] Item clicado para exclusão:", item);
+
+      if(!navigator.onLine){
+           console.log("📴 App OFFLINE — usando excluirOffline()");
+        excluirOffline(item._id);
+      }else{
+        console.log("🌐 App ONLINE — usando excluirTrecho()");
+        excluirTrecho(item);
+      }
+    }
+
+    
   return (
     <>
     {(salvando || excluindo) && (<ModalSalvando />)}
@@ -90,7 +105,7 @@ const Trecho = () => {
           <p><strong>Distância:</strong> {item.distancia} km</p>
           <p><strong>Início:</strong> {item.inicio}</p>
           <p><strong>Fim:</strong> {item.fim}</p>
-          <button className='botao-atencao' onClick={()=> excluirTrecho(item)}>Excluir <Trash2 /></button>
+          <button className='botao-atencao' onClick={()=> handleExcluir(item)}>Excluir <Trash2 /></button>
         </div>    
       ))}
     </div>

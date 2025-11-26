@@ -2,15 +2,17 @@
 import { useState } from "react";
 import api from "../api/api";
 import { removerItem } from "../services/idbService";
+import { useExcluirTrechoOff } from "./useExcluirTrechoOff";
 
 export function useExcluirTrecho(recarregarLista) {
   const [excluindo, setExcluindo] = useState(false);
-
+  
   const excluirTrecho = async (item) => {
     const confirmar = confirm("Deseja realmente excluir este registro?");
     if (!confirmar) return { sucesso: false, cancelado: true };
 
-    try {
+
+      try {
       setExcluindo(true);
 
       // 🟢 Excluir no backend

@@ -24,6 +24,7 @@ const TrechoPendenteLista = ({pendentes,setPendentes}) => {
       window.removeEventListener("pendentesAtualizados", handler);
     };
     },[]);
+ 
 
   // ⛔ Se não houver pendentes → não renderiza nada
   if (pendentes.length === 0) {
@@ -34,24 +35,19 @@ const TrechoPendenteLista = ({pendentes,setPendentes}) => {
     <div className='container'>
   <h3>Itens pendentes</h3>
 
-  {pendentes.length === 0 ? (    
-    ''
-  ) : (
-    pendentes.map((item) => (
-      <div key={item.uuid} className='card-pendente'>
-        
-        <ClockAlert className="icone" size={20} />
-
-        <p className="titulo">Trecho pendente</p>
-
-        <p><strong>Trecho:</strong> {item.data.nomeTrecho}</p>
-        <p><strong>Distância:</strong> {item.data.distancia} km</p>
-        <p><strong>Início:</strong> {isoToHHMM(item.data.inicio)}</p>
-        <p><strong>Fim:</strong> {isoToHHMM(item.data.fim)}</p>
-        <p><strong>Data:</strong> {isoToDate(item.data.data)}</p>
-      </div>
-    ))
-  )}
+  {pendentes
+  .filter(item => item && item.data)
+  .map((item) => (
+    <div key={item.uuid} className='card-pendente'>
+      <ClockAlert className="icone" size={20} />
+      <p className="titulo">Trecho pendente</p>
+      <p><strong>Trecho:</strong> {item.data.nomeTrecho}</p>
+      <p><strong>Distância:</strong> {item.data.distancia} km</p>
+      <p><strong>Início:</strong> {isoToHHMM(item.data.inicio)}</p>
+      <p><strong>Fim:</strong> {isoToHHMM(item.data.fim)}</p>
+      <p><strong>Data:</strong> {isoToDate(item.data.data)}</p>
+    </div>
+  ))}
 </div>
   )
 }

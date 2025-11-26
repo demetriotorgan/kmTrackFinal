@@ -2,6 +2,8 @@
 import { useState } from "react";
 import api from "../api/api";
 import { dateToIso, hhmmToIso } from "../util/time";
+import { salvarItem } from "../services/idbService";
+
 
 export function useSalvarTrecho() {
   const trechoInicial = {
@@ -72,6 +74,15 @@ export function useSalvarTrecho() {
       setSalvando(true);
       const response = await api.post("/salvar-trecho", payload);
       console.log(response.data);
+
+    // === NOVO: salva o registro retornado no cache offline ===
+  try {
+  // response.data deve ser o objeto criado com _id.
+  await salvarItem("listaDeTrechosOFF", response.data.trecho);
+  console.log("➕ Trecho também salvo em listaDeTrechosOFF:", response.data.trecho._id);
+} catch (e) {s
+  console.warn("Falha ao salvar trecho no IndexedDB:", e);
+}
 
       alert("Trecho salvo com sucesso!");
       window.dispatchEvent(new Event("trechoSalvoOnline"));

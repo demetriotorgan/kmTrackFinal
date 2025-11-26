@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Wifi, WifiOff } from "lucide-react";
 import api from "../api/api"; 
-import { salvarItem } from "../services/idbService";
+import { salvarItem, limparStore } from "../services/idbService";
 import DbStatus from './DbStatus';
 
 const StatusConexao = () => {
@@ -11,22 +11,31 @@ const StatusConexao = () => {
   // Função para carregar a lista da API e salvar no IndexedDB
   // -----------------------------
   const carregarListaTrechos = async () => {
-    if (!navigator.onLine) return; // segurança extra
+  if (!navigator.onLine) return;
 
-    try {
-      const { data } = await api.get("/listar-trechos");
+  try {
+    const { data } = await api.get("/listar-trechos");
 
-      if (Array.isArray(data)) {
-        // salva cada item usando o keyPath "_id"
-        for (const trecho of data) {
-          await salvarItem("listaDeTrechosOFF", trecho);
-        }
-        console.log("Lista carregada e salva no IndexedDB.");
+    if (Array.isArray(data)) {
+
+      // console.log("🔄 Limpando listaDeTrechosOFF...");
+      await limparStore("listaDeTrechosOFF");
+
+      // console.log("💾 Salvando lista nova no IndexedDB...");
+      for (const trecho of data) {
+        await salvarItem("listaDeTrechosOFF", trecho);
       }
-    } catch (err) {
-      console.warn("Erro ao carregar lista da API:", err);
+
+      // console.log("✔ Lista OFFLINE atualizada com sucesso");
+       // 🔥 Notifica todos os componentes para recarregar do IndexedDB
+      window.dispatchEvent(new Event("listaAtualizadaOffline"));
     }
-  };
+
+  } catch (err) {
+    console.warn("Erro ao carregar lista da API:", err);
+  }
+};
+
 
   // -----------------------------
   // 1️⃣ Executa ao INICIAR a aplicação
@@ -37,25 +46,40 @@ const StatusConexao = () => {
     }
   }, []); // roda apenas 1x ao montar
 
+  
   // -----------------------------
-  // 2️⃣ Executa quando voltar a ficar online
-  // -----------------------------
-  useEffect(() => {
-    const handleOnline = () => {
-      setOnline(true);
-      carregarListaTrechos(); // sincroniza quando voltar online
-    };
+// 2️⃣ Executa quando mudar o status da conexão
+// -----------------------------
+useEffect(() => {
+  const handleOnline = () => {
+    // console.log("🔵 Voltou ONLINE, sincronizando lista...");
+    setOnline(true);
+    carregarListaTrechos();   // sincroniza ao voltar
+  };
 
-    const handleOffline = () => setOnline(false);
+  const handleOffline = () => {
+    // console.log("🔴 Ficou OFFLINE");
+    setOnline(false);
+  };
 
-    window.addEventListener("online",  handleOnline);
-    window.addEventListener("offline", handleOffline);
+  // Evento disparado quando um trecho offline é sincronizado
+  const handleTrechoSincronizado = () => {
+    console.log("📡 Evento trechoSincronizadoOffline → recarregando lista...");
+    carregarListaTrechos();
+  };
 
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
+  // ADD LISTENERS
+  window.addEventListener("online", handleOnline);
+  window.addEventListener("offline", handleOffline);
+  window.addEventListener("trechoSincronizadoOffline", handleTrechoSincronizado);
+
+  // CLEANUP
+  return () => {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("offline", handleOffline);
+    window.removeEventListener("trechoSincronizadoOffline", handleTrechoSincronizado);
+  };
+}, []);
 
   return (
     <div

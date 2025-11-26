@@ -37,3 +37,24 @@ export async function removerItem(store, key) {
   await db.delete(store, key);
   emitirEventoPendentesAtualizados();
 }
+
+export async function limparStore(storeName) {
+  try {
+    const db = await getDB();
+
+    if (!db.objectStoreNames.contains(storeName)) {
+      console.warn(`Store ${storeName} não existe.`);
+      return;
+    }
+
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+
+    await store.clear();
+    await tx.done;
+
+    // console.log(`Store ${storeName} limpa com sucesso.`);
+  } catch (e) {
+    console.error("Erro ao limpar store:", e);
+  }
+}

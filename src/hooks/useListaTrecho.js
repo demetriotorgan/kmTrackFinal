@@ -9,6 +9,12 @@ export function useListaTrechos() {
     const [erro, setErro] = useState(null);
     const [listaIndexDB, setListaIndexDB] = useState(false);
 
+    // Função que atualiza a UI a partir do IndexedDB
+  const carregarListaDoIndexedDB = async () => {
+    const lista = await listarItens("listaDeTrechosOFF");
+    setListaTrechos(lista);
+  };
+
     const carregarTrechos = async () => {
         setCarregando(true);
         setErro(null);
@@ -83,11 +89,28 @@ useEffect(() => {
     };
 }, []);
 
+// Atualiza quando syncManager emitir o evento
+  useEffect(() => {
+    const atualizar = () => {
+        console.log("📦 Evento listaAtualizadaOffline recebido → Recarregando lista do IndexedDB");    
+        carregarListaDoIndexedDB();
+    }
+    
+    console.log("👂 Hook useListaTrechos está ESCUTANDO o evento listaAtualizadaOffline");
+    window.addEventListener("listaAtualizadaOffline", atualizar);
+
+    return () => {
+    console.log("🧹 Removendo listener listaAtualizadaOffline");
+      window.removeEventListener("listaAtualizadaOffline", atualizar);
+    };
+  }, []);
+
     return {
         listaTrechos,
-        carregando,
+        carregando, 
         erro,
         listaIndexDB,
         recarregar: carregarTrechos,
+        setListaTrechos
     };
 }

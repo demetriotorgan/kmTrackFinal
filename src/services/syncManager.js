@@ -1,6 +1,6 @@
 // src/services/syncManager.js
 import api from "../api/api";
-import { listarItens, removerItem } from "./idbService";
+import { listarItens, removerItem,salvarItem } from "./idbService";
 
 // ---------------------------------------------
 // Nome amigável do recurso
@@ -24,7 +24,7 @@ export async function syncPendentes() {
   const pendentes = await listarItens("pendentes");
 
   if (pendentes.length === 0) {
-    console.log("✨ Nenhum item pendente para sincronizar");
+    // console.log("✨ Nenhum item pendente para sincronizar");
     return;
   }
 
@@ -35,12 +35,19 @@ export async function syncPendentes() {
 
     try {
       console.log(`📤 Enviando ${nome} pendente para API...`, item);
+      // console.log("👉 Enviando DELETE", {url: item.url, method: item.method});
 
-      await api({
+      const response = await api({
         url: item.url,
         method: item.method,
-        data: item.data,
+         ...(item.method.toLowerCase() !== "delete" && { data: item.data })
       });
+
+      // Salvar no IndexedDB imediatamente antes do StatusConexao limpar a lista
+    if (item.method === "post" && response.data?.trecho) {
+      console.log("📌 Salvando novo trecho sincronizado no listaDeTrechosOFF...");
+      await salvarItem("listaDeTrechosOFF", response.data.trecho);
+    }
 
       // Remover item da fila
       await removerItem("pendentes", item.uuid);
@@ -85,7 +92,7 @@ export async function syncPendentes() {
 
   console.warn("🎉 Todos os itens pendentes foram sincronizados!");
   // 🔥 AVISA o hook useListaTrechos para recarregar da API
-  window.dispatchEvent(new Event("trechoSalvoOnline"));
+  window.dispatchEvent(new Event("trechoSincronizadoOffline"));
 }
 
 // ------------------------------------------------------
@@ -93,7 +100,7 @@ export async function syncPendentes() {
 // ------------------------------------------------------
 export function iniciarMonitoramento() {
   window.addEventListener("online", () => {
-    console.log("🌐 Conexão restaurada — iniciando sincronização offline...");
+    // console.log("🌐 Conexão restaurada — iniciando sincronização offline...");
     syncPendentes();
   });
 }
